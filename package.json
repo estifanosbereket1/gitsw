@@ -1,0 +1,29 @@
+{
+  "name": "gitswitcher",
+  "version": "0.1.0",
+  "description": "Switch safely between multiple GitHub accounts",
+  "type": "module",
+  "bin": {
+    "gitsw": "./dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "start": "node dist/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@inquirer/prompts": "^8.7.2",
+    "chalk": "^6.0.0",
+    "commander": "^15.0.0",
+    "execa": "^10.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
