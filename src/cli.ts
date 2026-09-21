@@ -7,6 +7,7 @@ import { registerUseCommand } from "./commands/use.js";
 import { registerCurrentCommand } from "./commands/current.js";
 import { registerPinCommand } from "./commands/pin.js";
 import { registerGuardCommands } from "./commands/guard.js";
+import { registerLinkCommands } from "./commands/link.js";
 
 const program = new Command();
 
@@ -22,5 +23,6 @@ registerUseCommand(program);
 registerCurrentCommand(program);
 registerPinCommand(program);
 registerGuardCommands(program);
+registerLinkCommands(program);
 
 program.parse();
