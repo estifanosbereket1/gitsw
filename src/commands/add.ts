@@ -1,11 +1,17 @@
 import type { Command } from "commander";
+import { input, select, password, confirm } from "@inquirer/prompts";
 import chalk from "chalk";
 import { promises as fs } from "node:fs";
 import { addProfile, loadStore } from "../lib/store.js";
 import { generateSshKey, upsertHostAlias, importSshKey } from "../lib/ssh.js";
+import {
+  approveCredential,
+  getCredentialHelpers,
+  configureCredentialStore,
+  verifyGitHubIdentityHttps,
+} from "../lib/https.js";
 import type { Profile } from "../types.js";
-import { approveCredential, configureCredentialStore, getCredentialHelpers, verifyGitHubIdentityHttps } from "../lib/https.js";
-import { input, select, password, confirm } from "@inquirer/prompts";
+import { ok, fail, warn, dim, spinner } from "../lib/ui.js";
 
 export function registerAddCommand(program: Command): void {
   program
@@ -45,22 +51,22 @@ export function registerAddCommand(program: Command): void {
 
         let helpers = await getCredentialHelpers();
         if (helpers.length === 0) {
-          console.log(chalk.yellow("\nNo git credential helper is configured — a token entered now would be silently lost."));
+          warn("No git credential helper is configured — a token entered now would be silently lost.");
           const setup = await confirm({
             message: "Configure local credential storage now (git config --global credential.helper store)?",
             default: true,
           });
           if (!setup) {
-            console.log(chalk.red("Can't add an HTTPS profile without a credential helper. Aborting."));
+            fail("Can't add an HTTPS profile without a credential helper. Aborting.");
             return;
           }
           await configureCredentialStore();
           helpers = await getCredentialHelpers();
           if (helpers.length === 0) {
-            console.log(chalk.red("Failed to configure a credential helper. Aborting."));
+            fail("Failed to configure a credential helper. Aborting.");
             return;
           }
-          console.log(chalk.dim("Note: 'store' saves tokens in plaintext at ~/.git-credentials.\n"));
+          dim("Note: 'store' saves tokens in plaintext at ~/.git-credentials.");
         }
 
         const token = await password({
@@ -70,20 +76,20 @@ export function registerAddCommand(program: Command): void {
 
         await approveCredential(username, token);
 
-        console.log(chalk.dim("Verifying stored credential..."));
+        const spin = spinner("Verifying stored credential...");
         const verify = await verifyGitHubIdentityHttps(username);
+        spin.stop();
+
         if (!verify.ok) {
-          console.log(chalk.red(`Could not verify the stored credential: ${verify.reason}`));
-          console.log(chalk.red("Aborting — profile not saved."));
+          fail(`Could not verify the stored credential: ${verify.reason}`);
+          fail("Aborting — profile not saved.");
           return;
         }
 
         profile.https = { username };
-        console.log(chalk.green(`✔ Credential stored and verified — Hi ${verify.login}!`));
-        console.log(
-          chalk.dim("To pin a specific repo to this account, run:\n") +
-          chalk.dim(`  gitsw pin ${profile.alias}\n`)
-        );
+        ok(`Credential stored and verified — Hi ${verify.login}!`);
+        dim("To pin a specific repo to this account, run:");
+        dim(`  gitsw pin ${profile.alias}`);
       } else {
         const hostAlias = `github.com-${profile.alias}`;
 
@@ -114,15 +120,16 @@ export function registerAddCommand(program: Command): void {
           keyPath = await importSshKey(rawPath);
           isNewKey = false;
         } else {
-          console.log(chalk.dim(`Generating a new SSH key for "${profile.alias}"...`));
+          const spin = spinner(`Generating a new SSH key for "${profile.alias}"...`);
           keyPath = await generateSshKey(profile.alias, email);
+          spin.stop();
           isNewKey = true;
         }
 
         await upsertHostAlias(hostAlias, keyPath);
         profile.ssh = { keyPath, hostAlias };
 
-        console.log(chalk.green(`✔ Key ready at ${keyPath}`));
+        ok(`Key ready at ${keyPath}`);
 
         if (isNewKey) {
           const pubKey = (await fs.readFile(`${keyPath}.pub`, "utf-8")).trim();
@@ -130,18 +137,14 @@ export function registerAddCommand(program: Command): void {
           console.log(chalk.cyan("https://github.com/settings/keys\n"));
           console.log(pubKey + "\n");
         } else {
-          console.log(
-            chalk.dim("Using an existing key — make sure it's already added to this account's GitHub settings.\n")
-          );
+          dim("Using an existing key — make sure it's already added to this account's GitHub settings.");
         }
 
-        console.log(
-          chalk.dim("To pin a specific repo to this account, set its remote to:\n") +
-          chalk.dim(`  git@${hostAlias}:ORG/REPO.git\n`)
-        );
+        dim("To pin a specific repo to this account, set its remote to:");
+        dim(`  git@${hostAlias}:ORG/REPO.git`);
       }
 
       await addProfile(profile);
-      console.log(chalk.green(`✔ Added profile "${profile.alias}"`));
+      ok(`Added profile "${profile.alias}"`);
     });
 }

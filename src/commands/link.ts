@@ -1,8 +1,7 @@
 import type { Command } from "commander";
-import chalk from "chalk";
 import { loadStore } from "../lib/store.js";
 import { linkFolder, unlinkFolder, listLinkedFolders } from "../lib/autolink.js";
-import { makeTable, warn } from "../lib/ui.js";
+import { makeTable, ok, fail, warn, dim } from "../lib/ui.js";
 
 export function registerLinkCommands(program: Command): void {
     program
@@ -12,18 +11,18 @@ export function registerLinkCommands(program: Command): void {
             const store = await loadStore();
             const profile = store.profiles.find((p) => p.alias === alias);
             if (!profile) {
-                console.error(chalk.red(`No profile named "${alias}". Run \`gitsw list\`.`));
+                fail(`No profile named "${alias}". Run \`gitsw list\`.`);
                 process.exitCode = 1;
                 return;
             }
 
             const dir = await linkFolder(profile, rawPath);
-            console.log(chalk.green(`✔ Linked "${alias}" to ${dir}`));
-            console.log(chalk.dim("  Every repo under this folder now auto-uses this identity"));
+            ok(`Linked "${alias}" to ${dir}`);
+            dim("  Every repo under this folder now auto-uses this identity");
             if (profile.authType === "ssh") {
-                console.log(chalk.dim("  and this SSH key — even on a fresh, unaliased clone, before you run `gitsw pin`."));
+                dim("  and this SSH key — even on a fresh, unaliased clone, before you run `gitsw pin`.");
             } else {
-                console.log(chalk.dim("  and this GitHub username for credential lookup — even before you run `gitsw pin`."));
+                dim("  and this GitHub username for credential lookup — even before you run `gitsw pin`.");
             }
         });
 
@@ -32,7 +31,8 @@ export function registerLinkCommands(program: Command): void {
         .description("Remove a folder's auto-linked profile")
         .action(async (rawPath: string) => {
             const removed = await unlinkFolder(rawPath);
-            console.log(removed ? chalk.green("✔ Unlinked.") : chalk.yellow("No link found for that path."));
+            if (removed) ok("Unlinked.");
+            else warn("No link found for that path.");
         });
 
     program
