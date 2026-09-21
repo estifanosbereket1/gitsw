@@ -1,14 +1,20 @@
 {
-  "name": "gitswitcher",
+   "name": "gitswitcher",
   "version": "0.1.0",
-  "description": "Switch safely between multiple GitHub accounts",
+  "description": "Switch safely between multiple GitHub accounts — identity, SSH keys, and credentials, all handled per account.",
+  "keywords": ["git", "github", "ssh", "cli", "account-switcher"],
   "type": "module",
   "bin": {
     "gitsw": "./dist/cli.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "<your-repo-url>"
+  },
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
+    "postbuild": "chmod +x dist/cli.js",
     "start": "node dist/cli.js"
   },
   "engines": {
