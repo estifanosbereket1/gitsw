@@ -1,10 +1,11 @@
 import type { Command } from "commander";
-import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import { promises as fs } from "node:fs";
 import { addProfile, loadStore } from "../lib/store.js";
 import { generateSshKey, upsertHostAlias, importSshKey } from "../lib/ssh.js";
 import type { Profile } from "../types.js";
+import { approveCredential, configureCredentialStore, getCredentialHelpers, verifyGitHubIdentityHttps } from "../lib/https.js";
+import { input, select, password, confirm } from "@inquirer/prompts";
 
 export function registerAddCommand(program: Command): void {
   program
@@ -40,10 +41,50 @@ export function registerAddCommand(program: Command): void {
       const profile: Profile = { alias: alias.trim(), name, email, authType };
 
       if (authType === "https") {
-        profile.https = {
-          username: await input({ message: "GitHub username for this account:" }),
-        };
-            } else {
+        const username = await input({ message: "GitHub username for this account:" });
+
+        let helpers = await getCredentialHelpers();
+        if (helpers.length === 0) {
+          console.log(chalk.yellow("\nNo git credential helper is configured — a token entered now would be silently lost."));
+          const setup = await confirm({
+            message: "Configure local credential storage now (git config --global credential.helper store)?",
+            default: true,
+          });
+          if (!setup) {
+            console.log(chalk.red("Can't add an HTTPS profile without a credential helper. Aborting."));
+            return;
+          }
+          await configureCredentialStore();
+          helpers = await getCredentialHelpers();
+          if (helpers.length === 0) {
+            console.log(chalk.red("Failed to configure a credential helper. Aborting."));
+            return;
+          }
+          console.log(chalk.dim("Note: 'store' saves tokens in plaintext at ~/.git-credentials.\n"));
+        }
+
+        const token = await password({
+          message: `Personal access token for ${username} (repo scope):`,
+          mask: "*",
+        });
+
+        await approveCredential(username, token);
+
+        console.log(chalk.dim("Verifying stored credential..."));
+        const verify = await verifyGitHubIdentityHttps(username);
+        if (!verify.ok) {
+          console.log(chalk.red(`Could not verify the stored credential: ${verify.reason}`));
+          console.log(chalk.red("Aborting — profile not saved."));
+          return;
+        }
+
+        profile.https = { username };
+        console.log(chalk.green(`✔ Credential stored and verified — Hi ${verify.login}!`));
+        console.log(
+          chalk.dim("To pin a specific repo to this account, run:\n") +
+          chalk.dim(`  gitsw pin ${profile.alias}\n`)
+        );
+      } else {
         const hostAlias = `github.com-${profile.alias}`;
 
         const keyChoice = await select({
