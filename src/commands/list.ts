@@ -1,6 +1,6 @@
 import type { Command } from "commander";
-import chalk from "chalk";
 import { listProfiles } from "../lib/store.js";
+import { makeTable, warn } from "../lib/ui.js";
 
 export function registerListCommand(program: Command): void {
   program
@@ -9,11 +9,12 @@ export function registerListCommand(program: Command): void {
     .action(async () => {
       const profiles = await listProfiles();
       if (profiles.length === 0) {
-        console.log(chalk.yellow("No profiles yet. Run `gitsw add` to create one."));
+        warn("No profiles yet. Run `gitsw add` to create one.");
         return;
       }
-      for (const p of profiles) {
-        console.log(`${chalk.bold(p.alias)} — ${p.name} <${p.email}> (${p.authType})`);
-      }
+
+      const table = makeTable(["Alias", "Name", "Email", "Auth"]);
+      for (const p of profiles) table.push([p.alias, p.name, p.email, p.authType]);
+      console.log(table.toString());
     });
 }

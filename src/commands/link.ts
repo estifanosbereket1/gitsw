@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import chalk from "chalk";
 import { loadStore } from "../lib/store.js";
 import { linkFolder, unlinkFolder, listLinkedFolders } from "../lib/autolink.js";
+import { makeTable, warn } from "../lib/ui.js";
 
 export function registerLinkCommands(program: Command): void {
     program
@@ -40,11 +41,11 @@ export function registerLinkCommands(program: Command): void {
         .action(async () => {
             const entries = await listLinkedFolders();
             if (entries.length === 0) {
-                console.log(chalk.yellow("No folders linked yet. Run `gitsw link <alias> <path>`."));
+                warn("No folders linked yet. Run `gitsw link <alias> <path>`.");
                 return;
             }
-            for (const e of entries) {
-                console.log(`${chalk.bold(e.dir)} → ${e.alias}`);
-            }
+            const table = makeTable(["Folder", "Profile"]);
+            for (const e of entries) table.push([e.dir, e.alias]);
+            console.log(table.toString());
         });
 }
