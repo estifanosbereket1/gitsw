@@ -26,15 +26,31 @@ function statusLine(result: Awaited<ReturnType<typeof checkRepo>>): string {
 export function registerWelcomeAction(program: Command): void {
     program.action(async () => {
         const store = await loadStore();
+
+        if (store.profiles.length === 0) {
+            box(
+                [
+                    chalk.bold("Welcome to gitsw 👋"),
+                    "",
+                    "Keep work and personal GitHub accounts from ever mixing —",
+                    "identity, SSH keys, and credentials, all handled per account.",
+                    "",
+                    chalk.dim("Get started:"),
+                    `  ${chalk.cyan("gitsw add")}     add your first account`,
+                ].join("\n"),
+                "gitsw"
+            );
+            return;
+        }
+
         const active = store.profiles.find((p) => p.alias === store.activeAlias);
         const links = await listLinkedFolders();
-
         const lines: string[] = [];
 
         lines.push(
             active
                 ? chalk.bold(`Active: ${active.alias}`) + chalk.dim(` — ${active.name} <${active.email}> (${active.authType})`)
-                : chalk.yellow("No active profile — run `gitsw use <alias>`")
+                : chalk.yellow("No active profile — run `gitsw use`")
         );
 
         if (await isInsideGitRepo()) {
@@ -47,7 +63,6 @@ export function registerWelcomeAction(program: Command): void {
         lines.push(chalk.dim(`${store.profiles.length} profile(s) · ${links.length} folder(s) linked`));
 
         box(lines.join("\n"), "gitsw");
-
-        dim("  add · list · use <alias> · current · pin <alias> · link <alias> <path> · doctor · --help");
+        dim("  add · list · use · current · pin <alias> · link <alias> <path> · doctor · --help");
     });
 }
