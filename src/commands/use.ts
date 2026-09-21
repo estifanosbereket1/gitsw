@@ -30,6 +30,10 @@ export function registerUseCommand(program: Command): void {
       console.log(chalk.green(`✔ Switched to "${alias}" (${profile.name} <${profile.email}>)`));
       if (profile.authType === "ssh") {
         console.log(chalk.dim("  Default SSH identity updated for unaliased git@github.com remotes."));
+      } else {
+        console.log(
+          chalk.dim("  HTTPS profile — identity set globally, but auth is per-repo. Run `gitsw pin` in a repo to bind its remote + credential to this account.")
+        );
       }
     });
 }
