@@ -4,7 +4,7 @@ import { execa } from "execa";
 
 const MARKER_START = "# >>> gitswitcher guard >>>";
 
-async function getHooksDir(cwd: string): Promise<string> {
+export async function getHooksDir(cwd: string): Promise<string> {
   const { stdout } = await execa("git", ["rev-parse", "--git-path", "hooks"], { cwd });
   const dir = stdout.trim();
   return path.isAbsolute(dir) ? dir : path.join(cwd, dir);
