@@ -1,8 +1,14 @@
 {
-   "name": "gitswitcher",
+  "name": "gitswitcher",
   "version": "0.1.0",
   "description": "Switch safely between multiple GitHub accounts — identity, SSH keys, and credentials, all handled per account.",
-  "keywords": ["git", "github", "ssh", "cli", "account-switcher"],
+  "keywords": [
+    "git",
+    "github",
+    "ssh",
+    "cli",
+    "account-switcher"
+  ],
   "type": "module",
   "bin": {
     "gitsw": "./dist/cli.js"
@@ -15,7 +21,11 @@
     "dev": "tsx src/cli.ts",
     "build": "tsc",
     "postbuild": "chmod +x dist/cli.js",
-    "start": "node dist/cli.js"
+    "start": "node dist/cli.js",
+    "lint": "eslint src tests",
+    "format": "prettier --write src tests",
+    "format:check": "prettier --check src tests",
+    "test": "vitest run"
   },
   "engines": {
     "node": ">=18"
@@ -32,8 +42,14 @@
     "ora": "^9.4.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.8",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.1"
   }
 }
