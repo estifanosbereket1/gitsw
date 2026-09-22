@@ -1,5 +1,5 @@
 {
-  "name": "gitswitcher",
+  "name": "gitsw",
   "version": "0.1.0",
   "description": "Switch safely between multiple GitHub accounts — identity, SSH keys, and credentials, all handled per account.",
   "keywords": [
@@ -13,9 +13,18 @@
   "bin": {
     "gitsw": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
-    "url": "<your-repo-url>"
+    "url": "https://github.com/estifanosbereket1/gitsw.git"
+  },
+  "homepage": "https://github.com/estifanosbereket1/gitsw#readme",
+  "bugs": {
+    "url": "https://github.com/estifanosbereket1/gitsw/issues"
   },
   "scripts": {
     "dev": "tsx src/cli.ts",
@@ -25,31 +34,14 @@
     "lint": "eslint src tests",
     "format": "prettier --write src tests",
     "format:check": "prettier --check src tests",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run lint && npm run format:check && npm test && npm run build"
   },
   "engines": {
     "node": ">=18"
   },
   "license": "MIT",
-  "dependencies": {
-    "@inquirer/prompts": "^8.7.2",
-    "boxen": "^9.0.0",
-    "chalk": "^6.0.0",
-    "cli-table3": "^0.6.5",
-    "commander": "^15.0.0",
-    "execa": "^10.0.1",
-    "log-symbols": "^7.0.1",
-    "ora": "^9.4.1"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/node": "^26.6.1",
-    "eslint": "^10.11.0",
-    "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.9.8",
-    "tsx": "^4.23.13",
-    "typescript": "~6.0.3",
-    "typescript-eslint": "^8.70.1",
-    "vitest": "^5.0.1"
+  "publishConfig": {
+    "access": "public"
   }
 }
