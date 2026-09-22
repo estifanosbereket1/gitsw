@@ -7,62 +7,67 @@ import { listLinkedFolders } from "../lib/autolink.js";
 import { box, dim } from "../lib/ui.js";
 
 function statusLine(result: Awaited<ReturnType<typeof checkRepo>>): string {
-    switch (result.status) {
-        case "ok":
-            return chalk.green(`✔ this repo is safely pinned to "${result.profile.alias}"`);
-        case "mismatch":
-            return chalk.red(`✖ identity mismatch — pinned to "${result.profile.alias}", run \`gitsw doctor\` for details`);
-        case "unguarded":
-            return chalk.yellow(`! matches "${result.profile.alias}" but has no commit guard — run \`gitsw pin ${result.profile.alias} --identity-only\``);
-        case "unaliased":
-            return chalk.dim("this repo's remote isn't pinned to any profile yet");
-        case "unknown-profile":
-            return chalk.dim("this repo doesn't match any known gitsw profile");
-        case "no-remote":
-            return chalk.dim("this repo has no remote yet");
-    }
+  switch (result.status) {
+    case "ok":
+      return chalk.green(`✔ this repo is safely pinned to "${result.profile.alias}"`);
+    case "mismatch":
+      return chalk.red(
+        `✖ identity mismatch — pinned to "${result.profile.alias}", run \`gitsw doctor\` for details`
+      );
+    case "unguarded":
+      return chalk.yellow(
+        `! matches "${result.profile.alias}" but has no commit guard — run \`gitsw pin ${result.profile.alias} --identity-only\``
+      );
+    case "unaliased":
+      return chalk.dim("this repo's remote isn't pinned to any profile yet");
+    case "unknown-profile":
+      return chalk.dim("this repo doesn't match any known gitsw profile");
+    case "no-remote":
+      return chalk.dim("this repo has no remote yet");
+  }
 }
 
 export function registerWelcomeAction(program: Command): void {
-    program.action(async () => {
-        const store = await loadStore();
+  program.action(async () => {
+    const store = await loadStore();
 
-        if (store.profiles.length === 0) {
-            box(
-                [
-                    chalk.bold("Welcome to gitsw 👋"),
-                    "",
-                    "Keep work and personal GitHub accounts from ever mixing —",
-                    "identity, SSH keys, and credentials, all handled per account.",
-                    "",
-                    chalk.dim("Get started:"),
-                    `  ${chalk.cyan("gitsw add")}     add your first account`,
-                ].join("\n"),
-                "gitsw"
-            );
-            return;
-        }
+    if (store.profiles.length === 0) {
+      box(
+        [
+          chalk.bold("Welcome to gitsw 👋"),
+          "",
+          "Keep work and personal GitHub accounts from ever mixing —",
+          "identity, SSH keys, and credentials, all handled per account.",
+          "",
+          chalk.dim("Get started:"),
+          `  ${chalk.cyan("gitsw add")}     add your first account`,
+        ].join("\n"),
+        "gitsw"
+      );
+      return;
+    }
 
-        const active = store.profiles.find((p) => p.alias === store.activeAlias);
-        const links = await listLinkedFolders();
-        const lines: string[] = [];
+    const active = store.profiles.find((p) => p.alias === store.activeAlias);
+    const links = await listLinkedFolders();
+    const lines: string[] = [];
 
-        lines.push(
-            active
-                ? chalk.bold(`Active: ${active.alias}`) + chalk.dim(` — ${active.name} <${active.email}> (${active.authType})`)
-                : chalk.yellow("No active profile — run `gitsw use`")
-        );
+    lines.push(
+      active
+        ? chalk.bold(`Active: ${active.alias}`) +
+            chalk.dim(` — ${active.name} <${active.email}> (${active.authType})`)
+        : chalk.yellow("No active profile — run `gitsw use`")
+    );
 
-        if (await isInsideGitRepo()) {
-            const result = await checkRepo(process.cwd());
-            lines.push("");
-            lines.push(statusLine(result));
-        }
+    if (await isInsideGitRepo()) {
+      const result = await checkRepo(process.cwd());
+      lines.push("");
+      lines.push(statusLine(result));
+    }
 
-        lines.push("");
-        lines.push(chalk.dim(`${store.profiles.length} profile(s) · ${links.length} folder(s) linked`));
+    lines.push("");
+    lines.push(chalk.dim(`${store.profiles.length} profile(s) · ${links.length} folder(s) linked`));
 
-        box(lines.join("\n"), "gitsw");
-        dim("  add · list · use · current · pin <alias> · link <alias> <path> · doctor · --help");
-    });
+    box(lines.join("\n"), "gitsw");
+    dim("  add · list · use · current · pin <alias> · link <alias> <path> · doctor · --help");
+  });
 }

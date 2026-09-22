@@ -51,9 +51,12 @@ export function registerAddCommand(program: Command): void {
 
         let helpers = await getCredentialHelpers();
         if (helpers.length === 0) {
-          warn("No git credential helper is configured — a token entered now would be silently lost.");
+          warn(
+            "No git credential helper is configured — a token entered now would be silently lost."
+          );
           const setup = await confirm({
-            message: "Configure local credential storage now (git config --global credential.helper store)?",
+            message:
+              "Configure local credential storage now (git config --global credential.helper store)?",
             default: true,
           });
           if (!setup) {
@@ -137,7 +140,9 @@ export function registerAddCommand(program: Command): void {
           console.log(chalk.cyan("https://github.com/settings/keys\n"));
           console.log(pubKey + "\n");
         } else {
-          dim("Using an existing key — make sure it's already added to this account's GitHub settings.");
+          dim(
+            "Using an existing key — make sure it's already added to this account's GitHub settings."
+          );
         }
 
         dim("To pin a specific repo to this account, set its remote to:");

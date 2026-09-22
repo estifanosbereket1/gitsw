@@ -61,7 +61,9 @@ export function registerUseCommand(program: Command): void {
       if (profile.authType === "ssh") {
         dim("  Default SSH identity updated for unaliased git@github.com remotes.");
       } else {
-        dim("  HTTPS profile — identity set globally, but auth is per-repo. Run `gitsw pin` in a repo to bind its remote + credential to this account.");
+        dim(
+          "  HTTPS profile — identity set globally, but auth is per-repo. Run `gitsw pin` in a repo to bind its remote + credential to this account."
+        );
       }
     });
 }

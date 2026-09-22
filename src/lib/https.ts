@@ -9,7 +9,10 @@ const GIT_ENV = { GIT_TERMINAL_PROMPT: "0" };
 export async function getCredentialHelpers(): Promise<string[]> {
   try {
     const { stdout } = await execa("git", ["config", "--get-all", "credential.helper"]);
-    return stdout.split("\n").map((s) => s.trim()).filter(Boolean);
+    return stdout
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
   } catch {
     return [];
   }
@@ -31,7 +34,11 @@ export async function rejectCredential(username: string): Promise<void> {
 
 async function fillCredential(username: string): Promise<string | null> {
   const input = `protocol=https\nhost=github.com\nusername=${username}\n\n`;
-  const { stdout } = await execa("git", ["credential", "fill"], { input, reject: false, env: GIT_ENV });
+  const { stdout } = await execa("git", ["credential", "fill"], {
+    input,
+    reject: false,
+    env: GIT_ENV,
+  });
   const match = stdout.match(/password=(.+)/);
   return match ? match[1].trim() : null;
 }

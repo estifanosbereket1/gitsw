@@ -18,11 +18,19 @@ export async function getRemoteUrl(remote: string, cwd = process.cwd()): Promise
   }
 }
 
-export async function setRemoteUrl(remote: string, url: string, cwd = process.cwd()): Promise<void> {
+export async function setRemoteUrl(
+  remote: string,
+  url: string,
+  cwd = process.cwd()
+): Promise<void> {
   await execa("git", ["remote", "set-url", remote, url], { cwd });
 }
 
-export async function setLocalIdentity(name: string, email: string, cwd = process.cwd()): Promise<void> {
+export async function setLocalIdentity(
+  name: string,
+  email: string,
+  cwd = process.cwd()
+): Promise<void> {
   // Deliberately NOT --global — this writes to .git/config, which git
   // prioritizes over ~/.gitconfig for any command run inside this repo.
   await execa("git", ["config", "user.name", name], { cwd });
@@ -39,9 +47,7 @@ export function parseGitHubRemote(url: string): { org: string; repo: string } | 
   if (!match) return null;
   return { org: match[1], repo: match[2] };
 }
-export type RemoteAuth =
-  | { type: "ssh"; hostAlias: string }
-  | { type: "https"; username: string };
+export type RemoteAuth = { type: "ssh"; hostAlias: string } | { type: "https"; username: string };
 
 // Only recognizes remotes with an explicit alias or embedded username —
 // a bare git@github.com or https://github.com/... is intentionally

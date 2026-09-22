@@ -23,7 +23,9 @@ export function registerCurrentCommand(program: Command): void {
         return;
       }
 
-      console.log(`${chalk.bold("Declared:")} ${profile.alias} — ${profile.name} <${profile.email}>`);
+      console.log(
+        `${chalk.bold("Declared:")} ${profile.alias} — ${profile.name} <${profile.email}>`
+      );
 
       if (profile.authType === "ssh") {
         const spin = spinner("Verifying via SSH...");
