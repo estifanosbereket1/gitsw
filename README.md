@@ -27,7 +27,7 @@ Changing your name and email in `.gitconfig` doesn't change either of those  so 
 Requires Node 18+ and git.
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/estifanosbereket1/gitsw
 cd gitswitcher
 npm install
 npm run build
