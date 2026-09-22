@@ -1,6 +1,6 @@
 {
   "name": "gitsw",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Switch safely between multiple GitHub accounts — identity, SSH keys, and credentials, all handled per account.",
   "keywords": [
     "git",
